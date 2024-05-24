@@ -157,12 +157,12 @@ void initState() {
 
 ### **Step 5**: Use the methods from the Storage class to manage your data.
 
-- `create()` method, creates or updates an item at a `key` with a `value`.
+- `create()` method: Creates or updates an item at a `key` with a `value`.
   ```dart
   await storage.create(key: 'key34', value: '34');
   ```
 
-- `createAll()` method, created multiple items using the `Map<String, String>` provided.
+- `createAll()` method: Creates multiple items using the `Map<String, String>` provided.
   ```dart
   await storage.createAll(values: {
         'key2': 'Value2',
@@ -171,12 +171,12 @@ void initState() {
         'key5': 'Value5',
       });
   ```
-- `read()` method, reads a single item at the `key` provided.
+- `read()` method: Reads a single item at the `key` provided.
   ```dart
   final value = await storage.read(key: 'key34');
   ```
 
-- `readAll()` method, reads multiple items according to the parameter `keys` provided.
+- `readAll()` method: Reads multiple items according to the parameter `keys` provided.
 
   - Read all items.
   ```dart
@@ -189,12 +189,12 @@ void initState() {
     await storage.readAll(keys: ['key1', 'key2', 'key3']); //pass the parameter keys containing keys 
   ```
 
-- `delete()` method, deletes a single item at the `key` provided.
+- `delete()` method: Deletes a single item at the `key` provided.
   ```dart
   await storage.delete(key: 'key34');
   ```
 
-- `deleteAll()` method, deletes multiple items according to the parameter `keys` provided. 
+- `deleteAll()` method: Deletes multiple items according to the parameter `keys` provided.
 
   - Delete all items.
   ```dart
