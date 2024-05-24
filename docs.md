@@ -1,9 +1,8 @@
 # Storage
 
-Vaah Flutter allows its users to use storage options without any hassle. You just need to add some dependencies and the storage service is ready to use.
+Vaah Flutter allows its users to use storage options without any hassle. You just need to write a few lines of code and the storage service is ready to use.
 
 ![Abstraction chart](https://img-v1.dev.getdemo.dev/screenshot/chrome_sJoUbLh7vm.png)
-
 
 Currently, it provides two local storage options: Hive and Flutter secure storage.
 
