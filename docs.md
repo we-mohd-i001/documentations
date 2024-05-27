@@ -161,7 +161,7 @@ void initState() {
   await storage.create(key: 'key34', value: '34');
   ```
 
-- `createAll()` method: Creates multiple items using the `Map<String, String>` provided.
+- `createAll()` method: Creates or updates multiple items using the `Map<String, String>` provided.
   ```dart
   await storage.createAll(values: {
         'key2': 'Value2',
