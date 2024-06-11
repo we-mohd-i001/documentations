@@ -1,243 +1,157 @@
-# Storage
+---
+toc: true
+title: Storage
+description: null
+---
 
-Vaah Flutter allows its users to use storage options without any hassle. You just need to write a few lines of code and the storage service is ready to use.
+Vaah Flutter allows its users to use storage options without any hassle. You just need to pass a couple of parameters in [environment configuration](../3.essentials/2.environments.md) and the storage service is ready to use.
 
-![Abstraction chart](https://img-v1.dev.getdemo.dev/screenshot/chrome_sJoUbLh7vm.png)
+- Flow diagram depicting the selection process where developers can choose both Local and Network Storage simultaneously, but only one option from the three available in each storage type.
+    <img src="/images/flutter/storage/storage-class-options.png" alt="storage-class-options.png">
 
-Currently, it provides two local storage options: Hive and Flutter secure storage.
 
 ## Overview
 
-The `Storage` class is an abstract class that provides an interface for local storage implementations. It supports two types of local storage: Hive and Flutter Secure Storage. Depending on the configuration, it can create an instance of either `HiveStorageImpl` or `FlutterSecureStorageImpl`. If no valid storage type is specified, a `NullStorage` implementation is used, which throws `UnimplementedError` for all methods.
+The `Storage` class is an abstract class that provides an interface for [local storage](../5.directory_structure/3.vaahextendflutter/5.services/storage/1.local_storage.md) and [network storage](../5.directory_structure/3.vaahextendflutter/5.services/storage/2.network_storage.md)(not implemented yet) implementations. 
 
-## Factory Constructor
+It supports two local storages to select from : Hive and Flutter Secure Storage. Depending on the configuration, it can create an instance of either `HiveStorageImpl` or `FlutterSecureStorageImpl`. If no valid storage type is specified, a `NoOpStorage` implementation is used, in which all methods are empty.
 
-### `createLocal({String name = 'default'})`
+::alert{type="info" class="flex items-center p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400" role="alert"}
+Note: For Usage Guide and Source code. [Local](../5.directory_structure/3.vaahextendflutter/5.services/storage/1.local_storage.md) and [Network](../5.directory_structure/3.vaahextendflutter/5.services/storage/2.network_storage.md).
+::
 
-Creates a new local storage instance based on the configuration in `EnvironmentConfig`.
+## Factory Constructors
 
-- **Parameters:**
-  - `name` (String): The name of the Hive box to be opened. Default is 'default'.
-  
-- **Returns:**
-  - An instance of `HiveStorageImpl`, `FlutterSecureStorageImpl`, or `NullStorage`.
+|        Name        |    Parameters   |  Returns    |  Description |
+|        :---        |     :---        |    :----    |     :---     |
+|   `createLocal()`  | (Optional) `name (String)` default is 'default' | An instance of `HiveStorageImpl`, `FlutterSecureStorageImpl`, or `NoOpStorage`. | Creates a new local storage instance based on the environment configuration. |
+
 
 ## Methods
 
-### `init()`
+| Name          | Parameters |  Returns    |  Description    |
+|    :---       |   :----    |    :----    |     :---        |
+| `init()`      | None       | `Future<void>` | Initializes the storage. For `HiveStorageImpl`, it sets up the Hive directory and opens a box. Not required for `FlutterSecureStorageImpl`. |
+| `create()`    | `key (String)` & `value (String)` | `Future<void>` | Creates or updates a single key-value pair in the storage. |
+| `createAll()` | `values (Map<String, String>)` | `Future<void>` | Creates or updates multiple key-value pairs in the storage. |
+| `read()`      | `key (String)` | `Future<String?>` | Reads the value of the item at the specified key from the storage. |
+| `readAll()`   | (Optional) `keys (List<String>)` default is empty List  | `Future<Map<String, String?>>` | Reads multiple values from the storage. If no keys are provided, it returns all values. |
+| `delete()`    | `key (String)` | `Future<String?>` | Deletes the item at the specified key from the storage. |
+| `deleteAll()` | (Optional) `keys (List<String>)` default is empty List | `Future<void>` | Deletes multiple items from the storage. If no keys are provided, it deletes all values. | 
 
-Initializes the storage. For `HiveStorageImpl`, it sets up the Hive directory and opens a box. Not required for `FlutterSecureStorageImpl`.
 
-- **Returns:**
-  - `Future<void>`
 
-### `create({required String key, required String value})`
+---
+toc: true
+title: Local Storage
+description: Documentation on using local storage options (Hive and Flutter Secure Storage) with Vaah Flutter.
+---
 
-Creates or updates a single key-value pair in the storage.
+## Overview
 
-- **Parameters:**
-  - `key` (String): The key for the item.
-  - `value` (String): The value for the item, can be a JSON string or plain text.
-  
-- **Returns:**
-  - `Future<void>`
+Vaah Flutter provides two local storage options: Hive and Flutter Secure Storage. This section guides you through setting up and using these local storage solutions.
 
-### `createAll({required Map<String, String> values})`
+Select one option from Hive and Flutter Secure Storage.
 
-Creates or updates multiple key-value pairs in the storage.
+| Hive  | Flutter Secure Storage |
+| :---- |          :----         |
+| The `HiveStorageImpl` class implements the `Storage` interface using Hive as the storage backend. It is used when `LocalStorageType.hive` is selected in the configuration. | The `FlutterSecureStorageImpl` class implements the `Storage` interface using Flutter Secure Storage as the storage backend. It is used when `LocalStorageType.flutterSecureStorage` is selected in the configuration. |
 
-- **Parameters:**
-  - `values` (Map<String, String>): A map of key-value pairs to be saved or updated.
-  
-- **Returns:**
-  - `Future<void>`
+## Setup
 
-### `read({required String key})`
+### If you select Hive
 
-Reads the value of the item at the specified key from the storage.
+Configure the storage type in the env.dart file.
 
-- **Parameters:**
-  - `key` (String): The key for the item.
-  
-- **Returns:**
-  - `Future<String?>`: The value of the item, or `null` if not found.
-
-### `readAll({List<String> keys = const []})`
-
-Reads multiple values from the storage. If no keys are provided, it returns all values.
-
-- **Parameters:**
-  - `keys` (List<String>): A list of keys to be read. Default is an empty list.
-  
-- **Returns:**
-  - `Future<Map<String, String?>>`: A map of key-value pairs.
-
-### `delete({required String key})`
-
-Deletes the item at the specified key from the storage.
-
-- **Parameters:**
-  - `key` (String): The key for the item to be deleted.
-  
-- **Returns:**
-  - `Future<void>`
-
-### `deleteAll({List<String> keys = const []})`
-
-Deletes multiple items from the storage. If no keys are provided, it deletes all values.
-
-- **Parameters:**
-  - `keys` (List<String>): A list of keys to be deleted. Default is an empty list.
-  
-- **Returns:**
-  - `Future<void>`
-
-## **How to use**
-
-Follow the step-by-step process given below.
-
-### **Step 1**: Add the depedencies to your `pubspec.yaml` file.
-- For Flutter Secure Storage
-  ```yaml
-  flutter_secure_storage: ^9.1.1
-  ```
-- For Hive
-  ```yaml
-  hive: ^2.2.3
-  path_provider: ^2.1.3
-  ```  
-
-### **Step 2**: In the `env.dart` file, provide the local storage type you want to use, if you select Hive, provide the `HiveConfig` too in the same `env.dart` file as shown in the snippet below.
-
-```dart 
+```dart
 final EnvironmentConfig defaultConfig = EnvironmentConfig(
-  appTitle: 'VaahFlutter',
-  appTitleShort: 'VaahFlutter',
-  envType: 'default',
-  version: version,
-  build: build,
-  backendUrl: '',
-  apiUrl: '',
-  timeoutLimit: 20 * 1000, // 20 seconds
-  enableLocalLogs: true,
-  enableCloudLogs: true,
-  enableApiLogInterceptor: true,
-  pushNotificationsServiceType: PushNotificationsServiceType.none,
-  internalNotificationsServiceType: InternalNotificationsServiceType.none,
-  showDebugPanel: true,
-  debugPanelColor: AppTheme.colors['black']!.withOpacity(0.8),
-  localStorageType: LocalStorageType.hive, //select storage type
-  hiveConfig: HiveConfig(), //Provide HiveConfig
+  // other configurations
+  localStorageType: LocalStorageType.hive,
+  hiveConfig: HiveConfig(),
 );
 ```
 
+### If you select Flutter Secure Storage
 
+Configure the storage type in the env.dart file.
 
-### **Step 3**: Create an object of the `Storage` class using the named constructors and store it in a variable. 
 ```dart
-final Storage storage = Storage.createLocal(name: 'local'); 
-//no need to provide ‘name’ in case of flutter secure storage.
+final EnvironmentConfig defaultConfig = EnvironmentConfig(
+  // other configurations
+  localStorageType: LocalStorageType.flutterSecureStorage,
+);
 ```
 
+::alert{type="info" class="flex items-center p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400" role="alert"}
+For more information about environment configuration [click here](../../../../3.essentials/2.environments.md).
+::
 
+## Usage Guide
 
+### Step 1: Create a Storage Instance
 
-### **Step 4**: Initialize the storage before using it.
+```dart
+final Storage storage = Storage.createLocal(name: 'local'); 
+```
+
+### Step 2: Initialize Storage (Only in case of Hive)
+
 ```dart
 @override
 void initState() {
   super.initState();
-  storage.init(); //initialize the storage
+  storage.init(); // initialize for Hive
 }
-
-// you can use any other approach for initialization 
 ```
-    Note: There is no need to initialize if you have selected flutter secure storage.
 
-### **Step 5**: Use the methods from the Storage class to manage your data.
+### Step 3: Use the methods
 
-- `create()` method: Creates or updates an item at a `key` with a `value`.
-  ```dart
-  await storage.create(key: 'key34', value: '34');
-  ```
-
-- `createAll()` method: Creates or updates multiple items using the `Map<String, String>` provided.
-  ```dart
-  await storage.createAll(values: {
-        'key2': 'Value2',
-        'key3': 'Value3',
-        'key4': 'Value4',
-        'key5': 'Value5',
-      });
-  ```
-- `read()` method: Reads a single item at the `key` provided.
-  ```dart
-  final value = await storage.read(key: 'key34');
-  ```
-
-- `readAll()` method: Reads multiple items according to the parameter `keys` provided.
-
-  - Read all items.
-  ```dart
-  final values = await storage.readAll();
-  ```
-  
-  - Read some items.
-  ```dart
-  final values = 
-    await storage.readAll(keys: ['key1', 'key2', 'key3']); //pass the parameter keys containing keys 
-  ```
-
-- `delete()` method: Deletes a single item at the `key` provided.
-  ```dart
-  await storage.delete(key: 'key34');
-  ```
-
-- `deleteAll()` method: Deletes multiple items according to the parameter `keys` provided.
-
-  - Delete all items.
-  ```dart
-  await storage.deleteAll();
-  ```
-  - Delete some items.
-  ```dart
-  await storage.deleteAll(keys: ['key1', 'key2', 'key3']); //pass the parameter keys containing keys 
-  ```
-
-## Best practices
-
-### Using toJson and fromJson Methods
-To store and retrieve complex objects, use toJson and fromJson methods. This approach allows you to handle any type of data by converting objects to JSON strings before storing them and parsing them back to objects after reading them.
-
-### Example
-#### Define your data model with toJson and fromJson methods:
+#### **Create or Update Items**
 
 ```dart
+await storage.create(key: 'key34', value: '34'); // single
+await storage.createAll(values: {
+  'key2': 'Value2',
+  'key3': 'Value3',
+}); // multiple
+```
 
+#### **Read Items**
+
+```dart
+final value = await storage.read(key: 'key34'); // single
+final values = await storage.readAll(keys: ['key2', 'key3']); // multiple
+final values = await storage.readAll(); // all
+```
+
+#### Delete Items
+
+```dart
+await storage.delete(key: 'key34'); // single
+await storage.deleteAll(keys: ['key2', 'key3']); // multiple
+await storage.deleteAll(); // all
+```
+
+## Best Practices
+### With `toJson` and `fromJson` Methods
+To store and retrieve complex objects, use toJson and fromJson methods for serialization and deserialization.
+
+### Example
+1. Define Data Model
+``` dart
 class User {
   String id;
   String name;
   String email;
+
   User({
     required this.id,
     required this.name,
     required this.email,
   });
 
-  User copyWith({
-    String? id,
-    String? name,
-    String? email,
-  }) {
-    return User(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      email: email ?? this.email,
-    );
-  }
-
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{
+    return {
       'id': id,
       'name': name,
       'email': email,
@@ -253,36 +167,30 @@ class User {
   }
 
   String toJson() => json.encode(toMap());
-
-  factory User.fromJson(String source) => User.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory User.fromJson(String source) => User.fromMap(json.decode(source));
 }
-
 ```
-#### Store a User object:
 
+2. Store a User Object
 ```dart
 final User user = User(id: '1', name: 'John Doe', email: 'john.doe@example.com');
 await storage.create(key: 'user_1', value: user.toJson());
 ```
 
-#### Retrieve a User object:
-
+3. Retrieve a User Object
 ```dart
 final String? userJson = await storage.read(key: 'user_1');
 if (userJson != null) {
   final User user = User.fromJson(userJson);
-  // Use the user object
 }
 ```
-This method ensures your data models are stored and retrieved in a type-safe manner, leveraging the power of JSON serialization and deserialization.
 
-## Source code
-
+## Source Code
 ### HiveStorageImpl Class
-This class implements Storage interface using Hive as storage backend.It is used when `LocalStorageType.hive` is selected in the configuration.
+This class implements the Storage interface using Hive as the storage backend.
+
 ```dart
 import 'package:hive/hive.dart';
-
 import '../../storage.dart';
 
 class HiveStorageImpl implements Storage {
@@ -290,7 +198,7 @@ class HiveStorageImpl implements Storage {
 
   Box? _box;
 
-  HiveStorageImpl({required this.name});
+  HiveStorageImpl({this.name = 'default'});
 
   @override
   Future<void> init() async {
@@ -299,79 +207,59 @@ class HiveStorageImpl implements Storage {
 
   @override
   Future<void> create({required String key, required String value}) async {
-    assert(_box != null, 'Box is null, not initiized.');
-
-    _box!.put(key, value);
+    await _box?.put(key, value);
   }
 
   @override
   Future<void> createAll({required Map<String, String> values}) async {
-    assert(_box != null, 'Box is null, not initiized.');
-
-    for (String k in values.keys) {
-      await _box!.put(k, values[k]);
-    }
+    await _box?.putAll(values);
   }
 
   @override
   Future<String?> read({required String key}) async {
-    assert(_box != null, 'Box is null, not initiized.');
-
-    String? result = _box!.get(key);
-    return result;
+    return _box?.get(key);
   }
 
   @override
   Future<Map<String, String?>> readAll({List<String> keys = const []}) async {
-    assert(_box != null, 'Box is null, not initiized.');
-
     if (keys.isEmpty) {
-      Map<String, String?> result =
-          _box!.toMap().map((key, value) => MapEntry(key.toString(), value?.toString()));
-      return result;
+      return Map<String, String?>.from(_box?.toMap() ?? {});
     } else {
-      Map<String, String?> result = {};
-      for (String k in keys) {
-        if (_box!.containsKey(k)) {
-          result[k] = _box!.get(k);
-        }
-      }
-      return result;
+      return Map.fromEntries(keys.map((key) => MapEntry(key, _box?.get(key))));
     }
   }
 
   @override
-  Future<void> delete({dynamic key}) async {
-    assert(_box != null, 'Box is null, not initiized.');
-
-    await _box!.delete(key);
+  Future<void> delete({required String key}) async {
+    await _box?.delete(key);
   }
 
   @override
   Future<void> deleteAll({List<String> keys = const []}) async {
-    assert(_box != null, 'Box is null, not initiized.');
-
     if (keys.isEmpty) {
-      await _box!.clear();
+      await _box?.clear();
     } else {
-      _box!.deleteAll(keys);
+      await _box?.deleteAll(keys);
     }
   }
 }
 ```
 
 ### FlutterSecureStorageImpl Class
-This class implements Storage interface using Flutter Secure Storage as storage backend.It is used when `LocalStorageType.flutterSecureStorage` is selected in the configuration.
+
+This class implements the Storage interface using Flutter Secure Storage as the storage backend.
+
 ```dart
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
 import '../../storage.dart';
 
 class FlutterSecureStorageImpl implements Storage {
-  final _storage = const FlutterSecureStorage();
+  final _storage = FlutterSecureStorage();
 
   @override
-  Future<void> init() async {}
+  Future<void> init() async {
+    // No initialization required for Flutter Secure Storage
+  }
 
   @override
   Future<void> create({required String key, required String value}) async {
@@ -380,26 +268,22 @@ class FlutterSecureStorageImpl implements Storage {
 
   @override
   Future<void> createAll({required Map<String, String> values}) async {
-    for (String k in values.keys) {
-      await _storage.write(key: k, value: values[k]);
-    }
+    await Future.wait(values.entries.map((e) => _storage.write(key: e.key, value: e.value)));
   }
 
   @override
   Future<String?> read({required String key}) async {
-    String? result = await _storage.read(key: key);
-    return result;
+    return await _storage.read(key: key);
   }
 
   @override
   Future<Map<String, String?>> readAll({List<String> keys = const []}) async {
     if (keys.isEmpty) {
-      final Map<String, String> result = await _storage.readAll();
-      return result;
+      return await _storage.readAll();
     } else {
       Map<String, String?> result = {};
-      for (String k in keys) {
-        result[k] = await _storage.read(key: k);
+      for (String key in keys) {
+        result[key] = await _storage.read(key: key);
       }
       return result;
     }
@@ -415,51 +299,10 @@ class FlutterSecureStorageImpl implements Storage {
     if (keys.isEmpty) {
       await _storage.deleteAll();
     } else {
-      for (String k in keys) {
-        await _storage.delete(key: k);
+      for (String key in keys) {
+        await _storage.delete(key: key);
       }
     }
-  }
-}
-```
-
-### NullStorage Class
-
-The `NullStorage` class is a placeholder implementation of the `Storage` interface that throws `UnimplementedError` for all methods. It is used when `LocalStorageType.none` is selected in the configuration.
-
-```dart
-class NullStorage implements Storage {
-  @override
-  Future<void> init() async {}
-
-  @override
-  Future<void> create({required String key, required String value}) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> createAll({required Map<String, String> values}) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<String?> read({required String key}) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Map<String, String?>> readAll({List<String> keys = const []}) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> delete({required String key}) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> deleteAll({List<String> keys = const []}) {
-    throw UnimplementedError();
   }
 }
 ```
