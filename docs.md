@@ -33,11 +33,11 @@ Note: For Usage Guide and Source code. [Local](../5.directory_structure/3.vaahex
 |    :---       |   :----    |    :----    |     :---        |
 | `init()`      | None       | `Future<void>` | Initializes the storage. For `HiveStorageImpl`, it sets up the Hive directory and opens a box. Not required for `FlutterSecureStorageImpl`. |
 | `create()`    | `key (String)` & `value (String)` | `Future<void>` | Creates or updates a single key-value pair in the storage. |
-| `createAll()` | `values (Map<String, String>)` | `Future<void>` | Creates or updates multiple key-value pairs in the storage. |
+| `createMany()` | `values (Map<String, String>)` | `Future<void>` | Creates or updates multiple key-value pairs in the storage. |
 | `read()`      | `key (String)` | `Future<String?>` | Reads the value of the item at the specified key from the storage. |
-| `readAll()`   | (Optional) `keys (List<String>)` default is empty List  | `Future<Map<String, String?>>` | Reads multiple values from the storage. If no keys are provided, it returns all values. |
+| `readMany()`   | (Optional) `keys (List<String>)` default is empty List  | `Future<Map<String, String?>>` | Reads multiple values from the storage. If no keys are provided, it returns all values. |
 | `delete()`    | `key (String)` | `Future<String?>` | Deletes the item at the specified key from the storage. |
-| `deleteAll()` | (Optional) `keys (List<String>)` default is empty List | `Future<void>` | Deletes multiple items from the storage. If no keys are provided, it deletes all values. | 
+| `deleteMany()` | (Optional) `keys (List<String>)` default is empty List | `Future<void>` | Deletes multiple items from the storage. If no keys are provided, it deletes all values. | 
 
 
 
@@ -110,7 +110,7 @@ void initState() {
 
 ```dart
 await storage.create(key: 'key34', value: '34'); // single
-await storage.createAll(values: {
+await storage.createMany(values: {
   'key2': 'Value2',
   'key3': 'Value3',
 }); // multiple
@@ -120,16 +120,16 @@ await storage.createAll(values: {
 
 ```dart
 final value = await storage.read(key: 'key34'); // single
-final values = await storage.readAll(keys: ['key2', 'key3']); // multiple
-final values = await storage.readAll(); // all
+final values = await storage.readMany(keys: ['key2', 'key3']); // multiple
+final values = await storage.readMany(); // all
 ```
 
 #### Delete Items
 
 ```dart
 await storage.delete(key: 'key34'); // single
-await storage.deleteAll(keys: ['key2', 'key3']); // multiple
-await storage.deleteAll(); // all
+await storage.deleteMany(keys: ['key2', 'key3']); // multiple
+await storage.deleteMany(); // all
 ```
 
 ## Best Practices
@@ -211,7 +211,7 @@ class HiveStorageImpl implements Storage {
   }
 
   @override
-  Future<void> createAll({required Map<String, String> values}) async {
+  Future<void> createMany({required Map<String, String> values}) async {
     await _box?.putAll(values);
   }
 
@@ -221,7 +221,8 @@ class HiveStorageImpl implements Storage {
   }
 
   @override
-  Future<Map<String, String?>> readAll({List<String> keys = const []}) async {
+  Future<Map<String, String?>> readMany
+({List<String> keys = const []}) async {
     if (keys.isEmpty) {
       return Map<String, String?>.from(_box?.toMap() ?? {});
     } else {
@@ -235,11 +236,11 @@ class HiveStorageImpl implements Storage {
   }
 
   @override
-  Future<void> deleteAll({List<String> keys = const []}) async {
+  Future<void> deleteMany({List<String> keys = const []}) async {
     if (keys.isEmpty) {
       await _box?.clear();
     } else {
-      await _box?.deleteAll(keys);
+      await _box?.deleteMany(keys);
     }
   }
 }
@@ -267,7 +268,7 @@ class FlutterSecureStorageImpl implements Storage {
   }
 
   @override
-  Future<void> createAll({required Map<String, String> values}) async {
+  Future<void> createMany({required Map<String, String> values}) async {
     await Future.wait(values.entries.map((e) => _storage.write(key: e.key, value: e.value)));
   }
 
@@ -277,9 +278,11 @@ class FlutterSecureStorageImpl implements Storage {
   }
 
   @override
-  Future<Map<String, String?>> readAll({List<String> keys = const []}) async {
+  Future<Map<String, String?>> readMany
+({List<String> keys = const []}) async {
     if (keys.isEmpty) {
-      return await _storage.readAll();
+      return await _storage.readMany
+    ();
     } else {
       Map<String, String?> result = {};
       for (String key in keys) {
@@ -295,9 +298,9 @@ class FlutterSecureStorageImpl implements Storage {
   }
 
   @override
-  Future<void> deleteAll({List<String> keys = const []}) async {
+  Future<void> deleteMany({List<String> keys = const []}) async {
     if (keys.isEmpty) {
-      await _storage.deleteAll();
+      await _storage.deleteMany();
     } else {
       for (String key in keys) {
         await _storage.delete(key: key);
